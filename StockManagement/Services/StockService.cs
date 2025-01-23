@@ -1,6 +1,7 @@
 ﻿using StockManagement.DataAccessLayer.Interfaces;
 using StockManagement.Model;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using StockManagement.Services.Interfaces;
 
@@ -9,49 +10,65 @@ namespace StockManagement.Services
     public class StockService : IStockService
     {
         private readonly IStockContext _stockContext;
+        private const int MaxQuantity = 50;
+        private const decimal MaxThreshold = 150m;
+        private const string SearchStockItemName = "Apple";
 
         public StockService(IStockContext stockContext)
         {
-            _stockContext = stockContext;
+            _stockContext = stockContext ?? throw new ArgumentNullException(nameof(stockContext));
+
+            _stockContext.InitStockContext();
         }
 
         public void MakeSomeTestWork()
         {
             AddTestData();
 
-            try
-            {
-                StockItem stockItem4 = new StockItem();
-                stockItem4.Name = "Meta";
-                stockItem4.ISIN = "US30303M1027";
-                stockItem4.Price = 66.15m;
-                stockItem4.Quantity = 10;
-
-                _stockContext.AddStockItem(stockItem4);
-            }
-            catch (ArgumentException)
-            {
-                Console.WriteLine("try to add existing ISIN");
-            }
-
             var stockItemList = _stockContext.GetAllStockItems();
-            stockItemList[0].Price = 200.00m;
 
-            _stockContext.UpdateStockItem(stockItemList[0]);
+            Console.WriteLine("\n all stock items: ");
+            ShowResultInConsole(stockItemList);
 
-            var stockItemList2 = _stockContext.GetAllStockItems();
+            var stockItemsBelowQuantity = GetStockItemsBelowQuantity(stockItemList, MaxQuantity);
 
-            //LINQ operations
-            //Querying stock items below a certain quantity.
-            var testQuantity = 50;
-            var stockItemNewList0 = stockItemList2.Where(x => x.Quantity < testQuantity).ToList();
+            Console.WriteLine($"\n stock items below {MaxQuantity} quantity: ");
+            ShowResultInConsole(stockItemsBelowQuantity);
 
-            //Query Below Threshold: Show any stock with Quantity < threshold.
-            var threshold = 150.00m;
-            var stockItemNewList = stockItemList2.Where(x => x.Price < threshold).ToList();
+            var stockItemsBelowThreshold = GetStockItemsBelowThreshold(stockItemList, MaxThreshold);
 
-            //Search by name
-            var stockItemNewList2 = stockItemList2.Where(x => x.Name.Contains("Apple")).ToList();
+            Console.WriteLine($"\n stock items below {MaxThreshold} threshold: ");
+            ShowResultInConsole(stockItemsBelowThreshold);
+            
+            var stockItemsNameFilter = SearchStockItemsByName(stockItemList, SearchStockItemName);
+
+            Console.WriteLine($"\n stock items contain '{SearchStockItemName}': ");
+            ShowResultInConsole(stockItemsNameFilter);
+
+            Console.ReadLine();
+        }
+
+        public IEnumerable<StockItem> SearchStockItemsByName(IEnumerable<StockItem> stockItemList, string searchStockItemName)
+        {
+            return stockItemList.Where(x => x.Name.Contains(searchStockItemName)).ToList();
+        }
+
+        public IEnumerable<StockItem> GetStockItemsBelowThreshold(IEnumerable<StockItem> stockItemList, decimal maxThreshold)
+        {
+            return stockItemList.Where(x => x.Price < maxThreshold).ToList();
+        }
+
+        public IEnumerable<StockItem> GetStockItemsBelowQuantity(IEnumerable<StockItem> stockItemList, int maxQuantity)
+        {
+            return stockItemList.Where(x => x.Quantity < maxQuantity).ToList();
+        }
+
+        private static void ShowResultInConsole(IEnumerable<StockItem> stockItemsBelowQuantity)
+        {
+            foreach (var stockItem in stockItemsBelowQuantity)
+            {
+                Console.WriteLine($"{stockItem.Name} {stockItem.ISIN} Quantity: {stockItem.Quantity} Price: {stockItem.Price}");
+            }
         }
 
         private void AddTestData()
@@ -59,7 +76,7 @@ namespace StockManagement.Services
             StockItem stockItem = new StockItem();
             stockItem.Name = "Apple Inc.";
             stockItem.ISIN = "US0378331005";
-            stockItem.Price = 123.45m;
+            stockItem.Price = 200m;
             stockItem.Quantity = 100;
 
             StockItem stockItem2 = new StockItem();

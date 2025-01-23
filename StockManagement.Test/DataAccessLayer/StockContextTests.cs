@@ -1,13 +1,11 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using StockManagement.DataAccessLayer;
-using StockManagement.Model;
-using System.Security.Cryptography;
 using StockManagement.DataAccessLayer.Interfaces;
+using StockManagement.Model;
 
-namespace StockManagement.Test
+namespace StockManagement.Test.DataAccessLayer
 {
     [TestClass]
     public class StockContextTests

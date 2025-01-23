@@ -8,7 +8,7 @@ namespace StockManagement.DataAccessLayer
 {
     public class StockContext : IStockContext
     {
-        private string _databaseName = "StockDb9.db";
+        private string _databaseName = "StockDb.db";
         private string _connectionString;
 
         public StockContext()
