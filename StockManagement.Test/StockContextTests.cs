@@ -5,13 +5,14 @@ using System.Linq;
 using StockManagement.DataAccessLayer;
 using StockManagement.Model;
 using System.Security.Cryptography;
+using StockManagement.DataAccessLayer.Interfaces;
 
 namespace StockManagement.Test
 {
     [TestClass]
     public class StockContextTests
     {
-        private StockContext _stockContext;
+        private IStockContext _stockContext;
 
         [TestInitialize]
         public void Setup()
@@ -26,8 +27,8 @@ namespace StockManagement.Test
             // Arrange
             var stockItem = new StockItem
             {
-                Name = "Test Stock",
-                ISIN = "TEST12345",
+                Name = "Apple Inc.",
+                ISIN = "US0378331005",
                 Price = 150.25m,
                 Quantity = 15
             };
@@ -66,22 +67,29 @@ namespace StockManagement.Test
         public void UpdateStockItem_ShouldUpdateItem_Succeeds()
         {
             // Arrange
+            var stockItemToAdd = new StockItem
+            {
+                Name = "Microsoft Corporation",
+                ISIN = "US5949181045",
+                Price = 150.25m,
+                Quantity = 15
+            };
+
+            _stockContext.AddStockItem(stockItemToAdd);
+
             var stockItem = new StockItem
             {
-                Id = 1,
-                Name = "Test Stock",
-                ISIN = "TEST111",
+                ISIN = "US5949181045",
                 Price = 22.25m,
                 Quantity = 3
             };
 
             // Act
             _stockContext.UpdateStockItem(stockItem);
-            var retrievedItem = _stockContext.GetStockItem(stockItem.Id);
+            var retrievedItem = _stockContext.GetStockItem(stockItem.ISIN);
 
             // Assert
             Assert.IsNotNull(retrievedItem);
-            Assert.AreEqual(stockItem.Name, retrievedItem.Name);
             Assert.AreEqual(stockItem.ISIN, retrievedItem.ISIN);
             Assert.AreEqual(stockItem.Price, retrievedItem.Price);
             Assert.AreEqual(stockItem.Quantity, retrievedItem.Quantity);
@@ -94,7 +102,6 @@ namespace StockManagement.Test
         {
             // Arrange
             StockItem stockItem = new StockItem();
-            stockItem.Id = 999;
             stockItem.Name = "test";
             stockItem.ISIN = "test";
             stockItem.Price = 333.55m;

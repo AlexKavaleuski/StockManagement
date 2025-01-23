@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
+using StockManagement.DataAccessLayer.Interfaces;
 using StockManagement.Model;
 
 namespace StockManagement.DataAccessLayer
 {
-    public class StockContext
+    public class StockContext : IStockContext
     {
-        private string _databaseName = "StockDb.db";
+        private string _databaseName = "StockDb9.db";
         private string _connectionString;
 
         public StockContext()
@@ -24,9 +25,8 @@ namespace StockManagement.DataAccessLayer
 
             string createStockItemTable = @"
                         CREATE TABLE IF NOT EXISTS StockItem (
-                            Id INTEGER PRIMARY KEY AUTOINCREMENT,
                             Name TEXT NOT NULL,
-                            ISIN TEXT NOT NULL,
+                            ISIN TEXT PRIMARY KEY NOT NULL,
                             Price REAL NOT NULL,
                             Quantity INTEGER NOT NULL
                         );";
@@ -118,7 +118,7 @@ namespace StockManagement.DataAccessLayer
         public void UpdateStockItem(StockItem item)
         {
             //Handle scenarios where the stock does not exist.
-            var stockItem = GetStockItem(item.Id);
+            var stockItem = GetStockItem(item.ISIN);
             
             if (stockItem == null || stockItem.ISIN == null)
             {
@@ -127,8 +127,8 @@ namespace StockManagement.DataAccessLayer
 
             string updateStockItemQuery = @"
                         UPDATE StockItem
-                        SET Name = @Name, Price = @Price, ISIN = @ISIN, Quantity = @Quantity
-                        WHERE Id = @Id;";
+                        SET Price = @Price, Quantity = @Quantity
+                        WHERE ISIN = @ISIN; ";
 
             try
             {
@@ -136,8 +136,6 @@ namespace StockManagement.DataAccessLayer
                 {
                     using (SQLiteCommand sqlCommand = new SQLiteCommand(updateStockItemQuery, sqlConnection))
                     {
-                        sqlCommand.Parameters.AddWithValue("@Id", item.Id);
-                        sqlCommand.Parameters.AddWithValue("@Name", item.Name);
                         sqlCommand.Parameters.AddWithValue("@ISIN", item.ISIN);
                         sqlCommand.Parameters.AddWithValue("@Price", item.Price);
                         sqlCommand.Parameters.AddWithValue("@Quantity", item.Quantity);
@@ -165,7 +163,6 @@ namespace StockManagement.DataAccessLayer
         {
             string getAllStockItemQuery = @"
                         SELECT 
-                            Id, 
                             Name, 
                             ISIN, 
                             Price, 
@@ -188,7 +185,6 @@ namespace StockManagement.DataAccessLayer
                             {
                                 StockItem stockItem = new StockItem
                                 {
-                                    Id = reader["Id"] == DBNull.Value ? 0 : Convert.ToInt32(reader["Id"]),
                                     Name = reader["Name"] == DBNull.Value ? string.Empty : reader["Name"].ToString(),
                                     ISIN = reader["ISIN"] == DBNull.Value ? string.Empty : reader["ISIN"].ToString(),
                                     Price = reader["Price"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["Price"]),
@@ -211,17 +207,16 @@ namespace StockManagement.DataAccessLayer
             return stockItemList;
         }
 
-        public StockItem GetStockItem(int id)
+        public StockItem GetStockItem(string ISIN)
         {
             string getAllStockItemQuery = @"
                         SELECT 
-                            Id,
                             Name, 
                             ISIN, 
                             Price, 
                             Quantity
                         FROM StockItem
-                        WHERE Id = @Id; ";
+                        WHERE ISIN = @ISIN; ";
 
             StockItem stockItem = new StockItem();
 
@@ -231,7 +226,7 @@ namespace StockManagement.DataAccessLayer
                 {
                     using (SQLiteCommand sqlCommand = new SQLiteCommand(getAllStockItemQuery, sqlConnection))
                     {
-                        sqlCommand.Parameters.AddWithValue("@Id", id);
+                        sqlCommand.Parameters.AddWithValue("@ISIN", ISIN);
 
                         sqlConnection.Open();
 
@@ -239,7 +234,6 @@ namespace StockManagement.DataAccessLayer
                         {
                             while (reader.Read())
                             {
-                                stockItem.Id = reader["Id"] == DBNull.Value ? 0 : Convert.ToInt32(reader["Id"]);
                                 stockItem.Name = reader["Name"] == DBNull.Value ? string.Empty : reader["Name"].ToString();
                                 stockItem.ISIN = reader["ISIN"] == DBNull.Value ? string.Empty : reader["ISIN"].ToString();
                                 stockItem.Price = reader["Price"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["Price"]);
@@ -258,7 +252,5 @@ namespace StockManagement.DataAccessLayer
 
             return stockItem;
         }
-
-        
     }
 }
