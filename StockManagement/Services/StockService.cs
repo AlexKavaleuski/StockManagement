@@ -50,7 +50,7 @@ namespace StockManagement.Services
 
         public IEnumerable<StockItem> SearchStockItemsByName(IEnumerable<StockItem> stockItemList, string searchStockItemName)
         {
-            return stockItemList.Where(x => x.Name.Contains(searchStockItemName)).ToList();
+            return stockItemList.Where(x => x.Name.IndexOf(searchStockItemName, StringComparison.OrdinalIgnoreCase) >=0 ).ToList();
         }
 
         public IEnumerable<StockItem> GetStockItemsBelowThreshold(IEnumerable<StockItem> stockItemList, decimal maxThreshold)

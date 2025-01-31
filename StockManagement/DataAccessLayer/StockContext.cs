@@ -55,7 +55,7 @@ namespace StockManagement.DataAccessLayer
 
         public void InitTestStockContext()
         {
-            _databaseName = String.Format("testDataBase_{0}.db", DateTime.Now.ToString("yyyyMMddTHHmmss"));
+            _databaseName = String.Format("testDataBase_{0}.db", DateTime.Now.ToString("yyyyMMdd_HHmmss"));
             _connectionString = String.Format("Data Source={0};Version=3;", _databaseName);
 
             InitStockContext();
