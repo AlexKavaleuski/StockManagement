@@ -16,9 +16,9 @@ namespace StockManagement.Services
 
         public StockService(IStockContext stockContext)
         {
-            _stockContext = stockContext ?? throw new ArgumentNullException(nameof(stockContext));
+            _stockContext = stockContext;
 
-            _stockContext.InitStockContext();
+            _stockContext.InitTestStockContext();
         }
 
         public void MakeSomeTestWork()
@@ -32,17 +32,17 @@ namespace StockManagement.Services
 
             var stockItemsBelowQuantity = GetStockItemsBelowQuantity(stockItemList, MaxQuantity);
 
-            Console.WriteLine($"\n stock items below {MaxQuantity} quantity: ");
+            Console.WriteLine(String.Format("\n stock items below {0} quantity: ", MaxQuantity));
             ShowResultInConsole(stockItemsBelowQuantity);
 
             var stockItemsBelowThreshold = GetStockItemsBelowThreshold(stockItemList, MaxThreshold);
 
-            Console.WriteLine($"\n stock items below {MaxThreshold} threshold: ");
+            Console.WriteLine(String.Format("\n stock items below {0} threshold: ", MaxThreshold));
             ShowResultInConsole(stockItemsBelowThreshold);
-            
+
             var stockItemsNameFilter = SearchStockItemsByName(stockItemList, SearchStockItemName);
 
-            Console.WriteLine($"\n stock items contain '{SearchStockItemName}': ");
+            Console.WriteLine(String.Format("\n stock items contain '{0}': ", SearchStockItemName));
             ShowResultInConsole(stockItemsNameFilter);
 
             Console.ReadLine();
@@ -67,7 +67,7 @@ namespace StockManagement.Services
         {
             foreach (var stockItem in stockItemsBelowQuantity)
             {
-                Console.WriteLine($"{stockItem.Name} {stockItem.ISIN} Quantity: {stockItem.Quantity} Price: {stockItem.Price}");
+                Console.WriteLine(String.Format("{0} {1} Quantity: {2} Price: {3}", stockItem.Name, stockItem.ISIN, stockItem.Quantity, stockItem.Price));
             }
         }
 
